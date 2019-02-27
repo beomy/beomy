@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="../dist/beomy.js"></script>
+    </head>
+    <body>
+        <div id="beomy-root"></div>
+    </body>
+    <script>
+        const beomy = new Beomy({
+            el: '#beomy-root',
+            data () {
+                return {
+                    temp: 1,
+                    list: []
+                }
+            },
+            methods: {
+                clickEvent (num) {
+                    console.log(num)
+                }
+            },
+            render () {
+                return `
+                    <div onclick="beomy.clickEvent(1)">
+                        <p onclick="beomy.clickEvent(2)">${this.temp}</p>
+                    </div>
+                `
+            }
+        })
+        console.log(beomy)
+    </script>
+</html>
