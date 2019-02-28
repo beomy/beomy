@@ -17,13 +17,13 @@
             },
             methods: {
                 clickEvent (num) {
-                    console.log(num)
+                    this.temp += num
                 }
             },
             render () {
                 return `
                     <div onclick="beomy.clickEvent(1)">
-                        <p onclick="beomy.clickEvent(2)">${this.temp}</p>
+                        <p>${this.temp}</p>
                     </div>
                 `
             }

@@ -1,5 +1,3 @@
-import BeomyElement from './beomyElement'
-
 global.Beomy = class Beomy {
     constructor (options) {
         this._el = document.querySelector(options.el)
@@ -7,7 +5,7 @@ global.Beomy = class Beomy {
         this._methods = options.methods
         this._render = options.render
         this._initBind()
-        this._rawHtml = this._render()
+        this._rawHtml = this._render().trim()
     }
 
    _initBind () {
@@ -43,8 +41,8 @@ global.Beomy = class Beomy {
                 return this.rawHtml
             },
             set (value) {
-                this.rawHtml = value
-                this._el.append(new BeomyElement(value).element)
+                this.rawHtml = value.trim()
+                this._el.innerHTML = value
             }
         })
     }
