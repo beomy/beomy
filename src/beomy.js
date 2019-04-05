@@ -1,3 +1,6 @@
+import './array'
+import Watcher from './watcher'
+
 global.Beomy = class Beomy {
     constructor (options) {
         this._el = document.querySelector(options.el)
@@ -5,13 +8,20 @@ global.Beomy = class Beomy {
         this._methods = options.methods
         this._render = options.render
         this._initBind()
-        this._rawHtml = this._render().trim()
+
+        // 초기 랜더링
+        this._rawHtml = this._render()
+
+        // Watcher 설정
+        this.watcher = global.watcher = new Watcher(() => {
+            this._rawHtml = this._render()
+        })
     }
 
    _initBind () {
         this._dataBind()
         this._methodsBind()
-        this._renderBind()
+        this._domBind()
     }
 
    _dataBind () {
@@ -23,7 +33,7 @@ global.Beomy = class Beomy {
                 },
                 set (value) {
                     this._data[item] = value
-                    this._rawHtml = this._render()
+                    this.watcher.renderTrigger()
                 }
             })
         }
@@ -35,7 +45,7 @@ global.Beomy = class Beomy {
         }
     }
 
-    _renderBind () {
+    _domBind () {
         Object.defineProperty(this, '_rawHtml', {
             get () {
                 return this.rawHtml

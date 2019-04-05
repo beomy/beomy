@@ -16,18 +16,35 @@
                 }
             },
             methods: {
-                clickEvent (num) {
+                addTemp (num) {
                     this.temp += num
+                },
+
+                pushList (num) {
+                    this.list.push(num)
                 }
             },
             render () {
+                let li = ''
+                // for (let i = 1; i <= this.temp; i++) {
+                //     li += `<li>${i}</li>`
+                // }
+                for (const i of this.list) {
+                    li += `<li>${i}</li>`
+                }
                 return `
-                    <div onclick="beomy.clickEvent(1)">
-                        <p>${this.temp}</p>
+                    <div>
+                        <div>
+                            <p>${this.temp}</p>
+                            <button onclick="beomy.addTemp(1)">ADD TEMP</button>
+                            <button onclick="beomy.pushList(1)">PUSH LIST</button>
+                        </div>
+                        <ul>
+                            ${li}
+                        </ul>
                     </div>
                 `
             }
         })
-        console.log(beomy)
     </script>
 </html>
