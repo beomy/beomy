@@ -12,23 +12,30 @@
             data () {
                 return {
                     temp: 1,
-                    list: []
+                    list: [],
+                    objInObj: {
+                        test: 1
+                    }
                 }
             },
             methods: {
                 addTemp (num) {
                     this.temp += num
+                    console.log(this)
                 },
 
                 pushList (num) {
                     this.list.push(num)
+                    console.log(this)
+                },
+
+                modifyObj (num) {
+                    this.objInObj.test += num
+                    console.log(this)
                 }
             },
             render () {
                 let li = ''
-                // for (let i = 1; i <= this.temp; i++) {
-                //     li += `<li>${i}</li>`
-                // }
                 for (const i of this.list) {
                     li += `<li>${i}</li>`
                 }
@@ -36,8 +43,10 @@
                     <div>
                         <div>
                             <p>${this.temp}</p>
+                            <p>${this.objInObj.test}</p>
                             <button onclick="beomy.addTemp(1)">ADD TEMP</button>
                             <button onclick="beomy.pushList(1)">PUSH LIST</button>
+                            <button onclick="beomy.modifyObj(1)">Modify Obj</button>
                         </div>
                         <ul>
                             ${li}
