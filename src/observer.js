@@ -3,10 +3,6 @@ export default class Observer {
         this._callback = callback
         this.observeArray()
     }
-
-    observe () {
-        this._callback()
-    }
     
     observeArray () {
         const arrayProto = Array.prototype
@@ -26,7 +22,7 @@ export default class Observer {
             const original = arrayProto[method]
             arrayProto[method] = function (...args) {
                 const result = original.apply(this, args)
-                _this.observe()
+                _this._callback()
                 return result
             }
         })
@@ -41,7 +37,7 @@ export default class Observer {
             },
             set: function reactiveSetter (newVal) {
                 val = newVal
-                _this.observe()
+                _this._callback()
             }
         })
     }

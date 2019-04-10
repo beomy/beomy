@@ -48,8 +48,11 @@ global.Beomy = class Beomy {
                 return this.rawHtml
             },
             set (value) {
-                this.rawHtml = value.trim()
-                this._el.innerHTML = value
+                const trimValue = value.trim()
+                if (this.rawHtml !== trimValue) {
+                    this.rawHtml = trimValue
+                    this._el.innerHTML = value
+                }
             }
         })
     }
