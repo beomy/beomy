@@ -1,56 +1,169 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="text/javascript" src="../dist/beomy.js"></script>
+        <link rel="stylesheet" type="text/css" href="./default.css" />
     </head>
     <body>
         <div id="beomy-root"></div>
+        <script type="text/javascript" src="../dist/beomy.js"></script>
     </body>
     <script>
+        function filterListComponent (filters, checkAssingee) {
+            const labels = filters.map(x => `
+                <label>
+                    <input type="checkbox" onclick="beomy.setAssignee('${x}')" ${checkAssingee.includes(x) ? 'checked' : ''}/>
+                    ${x}
+                </label>`)
+
+            return `
+                <div class="filter-area">
+                    <fieldset>
+                        <legend>Filter</legend>
+                        ${labels.join('')}
+                    </fieldset>
+                </div>
+            `
+        }
+
+        function issuePopupComponent () {
+            return `
+                <div class="overlay">
+                    <div class="popup">
+                        <div class="popup-head">
+                            <h2>New Issue</h2>
+                        </div>
+                        <div class="popup-body">
+                            <div class="issue-title">
+                                <label for="issue-title">Title</label>
+                                <input type="text" oninput="beomy.issue.title = event.target.value" />
+                            </div>
+                            <div class="issue-description">
+                                <label for="issue-description">Description</label>
+                                <textarea rows="3" oninput="beomy.issue.description  = event.target.value"></textarea>
+                            </div>
+                            <div class="issue-assignee">
+                                <label for="issue-assignee">Assignee</label>
+                                <input type="text" oninput="beomy.issue.assignee = event.target.value.split(',').map(x => x.trim())" />
+                            </div>
+                        </div>
+                        <div class="popup-footer">
+                            <div class="popup-button-area">
+                                <button onclick="beomy.createIssue()">Ok</button>
+                                <button onclick="beomy.isPopupShow = false">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `
+        }
+
+        function issueItemComponent (issue) {
+            return `
+                <div class="issue-item" draggable="true" ondragstart="beomy.drag(event, ${issue.id})">
+                    <div class="issue-tools">
+                        <button class="delete-issue">&times</button>
+                    </div>
+                    <div class="issue-title">
+                        <div>Title</div>
+                        <div>${issue.title}</div>
+                    </div>
+                    <div class="issue-description">
+                        <div>Description</div>
+                        <div>${issue.description}</div>
+                    </div>
+                    <div class="issue-assignee">
+                        <div>Assignee</div>
+                        <div>${issue.assignee.join(', ')}</div>
+                    </div>
+                </div>
+            `
+        }
+
+        function issueListComponent (title, type, issueList) {
+            const issueEl = issueList.map(x => issueItemComponent(x))
+            return `
+                <div class="todo-area">
+                    <fieldset>
+                        <legend>${title}</legend>
+                        <div class="drop-area" ondrop="beomy.drop(event, '${type}')" ondragover="beomy.allowDrop(event)">
+                            ${issueEl.join('')}
+                        </div>
+                    </fieldset>
+                </div>
+            `
+        }
+
         const beomy = new Beomy({
             el: '#beomy-root',
             data () {
                 return {
-                    temp: 1,
-                    list: [],
-                    objInObj: {
-                        test: 1
-                    }
+                    assignee: ['홍길동', '이순신', '김선달'],
+                    isPopupShow: false,
+                    issue: {
+                        title: '',
+                        description: '',
+                        assignee: [],
+                        type: 'toDo'
+                    },
+                    checkAssingee: [],
+                    issueList: []
                 }
             },
             methods: {
-                addTemp (num) {
-                    this.temp += num
-                    console.log(this)
+                createIssue () {
+                    const idList = this.issueList.map(x => x.id)
+                    const id = idList.length ? Math.max(...idList) + 1 : 1
+                    const assignee = this.issue.assignee
+                    this.assignee = [...new Set(assignee.concat(this.assignee))]
+                    this.issueList.push(Object.assign({id}, this.issue))
+                    this.isPopupShow = false
                 },
 
-                pushList (num) {
-                    this.list.push(num)
-                    console.log(this)
+                setAssignee (assignee) {
+                    if (this.checkAssingee.includes(assignee)) {
+                        this.checkAssingee.splice(this.checkAssingee.indexOf(assignee), 1)
+                    } else {
+                        this.checkAssingee.push(assignee)
+                    }
                 },
 
-                modifyObj (num) {
-                    this.objInObj.test += num
-                    console.log(this)
+                allowDrop(ev) {
+                    ev.preventDefault();
+                },
+
+                drag(ev, id) {
+                    ev.dataTransfer.setData("nodeId", id);
+                },
+
+                drop(ev, type) {
+                    ev.preventDefault();
+                    const nodeId = ev.dataTransfer.getData("nodeId");
+                    if (nodeId !== '') {
+                        const issue = this.issueList.find(x => x.id === Number(nodeId))
+                        const issueIndex = this.issueList.indexOf(issue)
+                        issue.type = type
+                        this.issueList.splice(issueIndex, 1, issue)
+                    }
                 }
             },
             render () {
-                let li = ''
-                for (const i of this.list) {
-                    li += `<li>${i}</li>`
-                }
+                const checkedIssueList = this.checkAssingee.length === 0
+                    ? this.issueList
+                    : this.issueList.filter(x => x.assignee.some(s => this.checkAssingee.includes(s)))
+                const toDoList = checkedIssueList.filter(x => x.type === 'toDo')
+                const inProgressList = checkedIssueList.filter(x => x.type === 'inProgress')
+                const doneList = checkedIssueList.filter(x => x.type === 'done')
+
                 return `
                     <div>
-                        <div>
-                            <p>${this.temp}</p>
-                            <p>${this.objInObj.test}</p>
-                            <button onclick="beomy.addTemp(1)">ADD TEMP</button>
-                            <button onclick="beomy.pushList(1)">PUSH LIST</button>
-                            <button onclick="beomy.modifyObj(1)">Modify Obj</button>
+                        ${filterListComponent(this.assignee, this.checkAssingee)}
+                        <div class="button-area">
+                            <button onclick="beomy.isPopupShow = true">Create Issue</button>
                         </div>
-                        <ul>
-                            ${li}
-                        </ul>
+                        ${this.isPopupShow ? issuePopupComponent() : ''}
+                        ${issueListComponent('To Do', 'toDo', toDoList)}
+                        ${issueListComponent('In Progress','inProgress' ,inProgressList)}
+                        ${issueListComponent('Done','done' , doneList)}
                     </div>
                 `
             }
