@@ -1,44 +1,44 @@
 export default class Observer {
-    constructor (callback) {
-        this._callback = callback
-        this.observeArray()
-    }
-    
-    observeArray () {
-        const arrayProto = Array.prototype
+  constructor (callback) {
+    this._callback = callback
+    this.observeArray()
+  }
 
-        const methodsToPatch = [
-            'push',
-            'pop',
-            'shift',
-            'unshift',
-            'splice',
-            'sort',
-            'reverse'
-        ]
+  observeArray () {
+    const arrayProto = Array.prototype
 
-        const _this = this
-        methodsToPatch.forEach((method) => {
-            const original = arrayProto[method]
-            arrayProto[method] = function (...args) {
-                const result = original.apply(this, args)
-                _this._callback()
-                return result
-            }
-        })
-    }
+    const methodsToPatch = [
+      'push',
+      'pop',
+      'shift',
+      'unshift',
+      'splice',
+      'sort',
+      'reverse'
+    ]
 
-    defineReactive (obj, key) {
-        let val = obj[key]
-        const _this = this
-        Object.defineProperty(obj, key, {
-            get: function reactiveGetter () {
-                return val
-            },
-            set: function reactiveSetter (newVal) {
-                val = newVal
-                _this._callback()
-            }
-        })
-    }
+    const _this = this
+    methodsToPatch.forEach((method) => {
+      const original = arrayProto[method]
+      arrayProto[method] = function (...args) {
+        const result = original.apply(this, args)
+        _this._callback()
+        return result
+      }
+    })
+  }
+
+  defineReactive (obj, key) {
+    let val = obj[key]
+    const _this = this
+    Object.defineProperty(obj, key, {
+      get: function reactiveGetter () {
+        return val
+      },
+      set: function reactiveSetter (newVal) {
+        val = newVal
+        _this._callback()
+      }
+    })
+  }
 }
